@@ -1,0 +1,10 @@
+../Core/Src/lcd_i2c.c:18:13:Delay	16	static
+../Core/Src/lcd_i2c.c:23:13:WriteI2C	32	static
+../Core/Src/lcd_i2c.c:51:6:CLCD_Init	24	static
+../Core/Src/lcd_i2c.c:96:6:SetCursor	24	static
+../Core/Src/lcd_i2c.c:120:6:UpdateCharBuffer	16	static
+../Core/Src/lcd_i2c.c:125:6:CLCD_PrintCharBuffer	16	static
+../Core/Src/lcd_i2c.c:131:6:CLCD_PrintStringBuffer	16	static
+../Core/Src/lcd_i2c.c:139:6:CLCD_PrintNumBuffer	16	static
+../Core/Src/lcd_i2c.c:143:6:CLCD_ClearBuffer	16	static
+../Core/Src/lcd_i2c.c:149:6:CLCD_DisplayScreen	16	static
