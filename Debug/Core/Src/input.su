@@ -1,0 +1,5 @@
+../Core/Src/input.c:19:6:IN_Init	4	static
+../Core/Src/input.c:26:6:IN_ReadButton	16	static
+../Core/Src/input.c:40:10:IN_Stick	16	static
+../Core/Src/input.c:45:9:IN_IsPressed	16	static
+../Core/Src/input.c:51:9:IN_IsPressed_ms	16	static

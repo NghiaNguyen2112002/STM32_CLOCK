@@ -12,7 +12,7 @@
 #include "stm32f1xx_hal.h"
 #include "main.h"
 
-#define ADDRESS_DS130X       0x68
+#define ADDRESS_DS130X       	0x68		//ds1307
 
 #define ADDRESS_SECOND          0x00
 #define ADDRESS_MINUTE          0x01
@@ -29,6 +29,8 @@
 
 void DS_Init(I2C_HandleTypeDef* hi2c);
 void DS_Write(uint8_t address, uint8_t data);
-uint8_t DS_Write(uint8_t address);
+uint8_t DS_Read(uint8_t address);
+void DS_SetupTimForFirstProgram(void);
+
 
 #endif /* INC_DS130X_H_ */

@@ -62,6 +62,9 @@
 #define LCD_BACKLIGHT			0x08  // Back light bit on
 #define LCD_NOBACKLIGHT			0x00  // Back light off
 
+//==============NOTE FOR CUSTOM NUM==============//
+#define BIG_BLANK				100
+
 
 typedef struct{
 	I2C_HandleTypeDef* I2C;
@@ -79,12 +82,18 @@ typedef struct{
 
 void CLCD_Init(I2C_HandleTypeDef* I2C, uint8_t address, uint8_t row, uint8_t col);
 
-void CLCD_PrintCharBuffer(uint8_t row, uint8_t col, uint8_t c);
-void CLCD_PrintStringBuffer(uint8_t row, uint8_t col, uint8_t* str);
-void CLCD_PrintNumBuffer(uint8_t row, uint8_t col, uint16_t str);
+void CLCD_PrintCharBuffer(uint8_t row, uint8_t col, char c);
+void CLCD_PrintStringBuffer(uint8_t row, uint8_t col, char* str);
+void CLCD_PrintNumBuffer(uint8_t row, uint8_t col, int16_t num);
+void CLCD_PrintFloatBuffer(uint8_t row, uint8_t col, float f);
 
 void CLCD_ClearBuffer(void);
-
 void CLCD_DisplayScreen(void);
+
+//=============CUSTOM CHAR=============//
+void CLCD_InitBigDigit(void);
+void CLCD_CreateChar(uint8_t addr, uint8_t* custom_arr);
+void CLCD_PrintBigDigitBuffer(uint8_t col, int8_t digit);
+void CLCD_PrintBigNumBuffer(uint8_t col, int8_t number);
 
 #endif /* INC_LCD_I2C_H_ */

@@ -19,6 +19,81 @@ static void Delay(uint16_t time){
 	HAL_Delay(time);
 }
 
+uint8_t LT[8] = {
+		0b00111,
+		0b01111,
+		0b11111,
+		0b11111,
+		0b11111,
+		0b11111,
+		0b11111,
+		0b11111
+};
+
+uint8_t UB[8] = {
+		0b11111,
+		0b11111,
+		0b11111,
+		0b00000,
+		0b00000,
+		0b00000,
+		0b00000,
+		0b00000,
+};
+
+uint8_t RT[8] = {
+		0b11100,
+		0b11110,
+		0b11111,
+		0b11111,
+		0b11111,
+		0b11111,
+		0b11111,
+		0b11111
+};
+
+uint8_t LL[8] = {
+		0b11111,
+		0b11111,
+		0b11111,
+		0b11111,
+		0b11111,
+		0b11111,
+		0b01111,
+		0b00111
+};
+
+uint8_t LB[8] = {
+		0b00000,
+		0b00000,
+		0b00000,
+		0b00000,
+		0b00000,
+		0b11111,
+		0b11111,
+		0b11111
+};
+
+uint8_t LR[8] = {
+		0b11111,
+		0b11111,
+		0b11111,
+		0b11111,
+		0b11111,
+		0b11110,
+		0b11100
+};
+
+uint8_t MB[8] = {
+		0b11111,
+		0b11111,
+		0b11111,
+		0b00000,
+		0b00000,
+		0b00000,
+		0b11111,
+		0b11111
+};
 
 static void WriteI2C(uint8_t data, uint8_t mode){
 	uint8_t dataH, dataL;
@@ -93,6 +168,7 @@ void CLCD_Init(I2C_HandleTypeDef* I2C, uint8_t address, uint8_t row, uint8_t col
 	WriteI2C(LCD_RETURNHOME, LCD_COMMAND);
 }
 
+
 void SetCursor(uint8_t row, uint8_t col){
 	uint8_t address_dram = 0x00;
 
@@ -122,13 +198,13 @@ void UpdateCharBuffer(uint8_t c){
 	currentCol++;
 }
 
-void CLCD_PrintCharBuffer(uint8_t row, uint8_t col, uint8_t c){
+void CLCD_PrintCharBuffer(uint8_t row, uint8_t col, char c){
 	currentRow = row % LCD.ROW;
 	currentCol = col % LCD.COL;
 	Lcd_buffer[currentRow * LCD.COL + currentCol] = c;
 }
 
-void CLCD_PrintStringBuffer(uint8_t row, uint8_t col, uint8_t* str){
+void CLCD_PrintStringBuffer(uint8_t row, uint8_t col, char* str){
 	currentRow = row % LCD.ROW;
 	currentCol = col % LCD.COL;
 	while(*str){
@@ -136,8 +212,61 @@ void CLCD_PrintStringBuffer(uint8_t row, uint8_t col, uint8_t* str){
 	}
 }
 
-void CLCD_PrintNumBuffer(uint8_t row, uint8_t col, uint16_t str){
+void CLCD_PrintNumBuffer(uint8_t row, uint8_t col, int16_t num){
+    char flag_num = 0;
+    unsigned char i;
+    unsigned long power_of_10 = 1000000000;
+    currentRow = row % 2;
+    currentCol = col % 16;
 
+    if(num < 0) {
+        num *= -1;
+        UpdateCharBuffer('-');
+    }
+    else if(num == 0){
+    	UpdateCharBuffer('0');
+    	UpdateCharBuffer('0');
+//        UpdateCharBuffer(' ');
+//        UpdateCharBuffer(' ');
+        return;
+    }
+
+    else if(num < 10){
+        UpdateCharBuffer('0');
+    }
+
+    for(i = 10; i > 0; i--){
+        if( (num / power_of_10) != 0){
+            flag_num = 1;
+            UpdateCharBuffer(num / power_of_10 + '0');
+        }
+        else{
+            if(flag_num != 0) UpdateCharBuffer('0');
+        }
+        num %= power_of_10;
+        power_of_10 /= 10;
+    }
+
+//    UpdateCharBuffer(' ');
+//    UpdateCharBuffer(' ');
+}
+
+
+void CLCD_PrintFloatBuffer(uint8_t row, uint8_t col, float f){
+	uint8_t integer_part, decimal_part;
+
+	if(f >= 100) return;
+
+    currentRow = row % 2;
+    currentCol = col % 16;
+
+    integer_part = (uint8_t) f;
+    decimal_part = (uint8_t) ((f - integer_part)*10);
+
+    UpdateCharBuffer(integer_part / 10 + '0');
+    UpdateCharBuffer(integer_part % 10 + '0');
+    UpdateCharBuffer('.');
+    UpdateCharBuffer(decimal_part % 10 + '0');
 }
 
 void CLCD_ClearBuffer(void){
@@ -157,10 +286,178 @@ void CLCD_DisplayScreen(void){
 	}
 }
 
+//=============CUSTOM CHAR=============//
+void CLCD_CreateChar(uint8_t addr, uint8_t* custom_arr){
+	uint8_t i;
 
+	WriteI2C(LCD_SETCGRAMADDR + 8*addr, LCD_COMMAND);
 
+	for(i = 0; i < 8; i++){
+		WriteI2C(custom_arr[i], LCD_DATA);
+	}
+}
 
+void CLCD_InitBigDigit(void){
+	CLCD_CreateChar(0, LT);
+	CLCD_CreateChar(1, UB);
+	CLCD_CreateChar(2, RT);
+	CLCD_CreateChar(3, LL);
+	CLCD_CreateChar(4, LB);
+	CLCD_CreateChar(5, LR);
+	CLCD_CreateChar(6, MB);
+}
 
+void CLCD_PrintBigDigitBuffer(uint8_t col, int8_t digit){
+	currentRow = 0;
+	currentCol = col % 16;
+
+	switch(digit){
+	case 0:
+		UpdateCharBuffer(0);
+		UpdateCharBuffer(1);
+		UpdateCharBuffer(2);
+
+		currentRow = 1;
+		currentCol = col % 16;
+
+		UpdateCharBuffer(3);
+		UpdateCharBuffer(4);
+		UpdateCharBuffer(5);
+		break;
+	case 1:
+		UpdateCharBuffer(1);
+		UpdateCharBuffer(2);
+		UpdateCharBuffer(' ');
+
+		currentRow = 1;
+		currentCol = col % 16;
+
+		UpdateCharBuffer(4);
+		UpdateCharBuffer(0xFF);
+		UpdateCharBuffer(4);
+		break;
+	case 2:
+		UpdateCharBuffer(6);
+		UpdateCharBuffer(6);
+		UpdateCharBuffer(2);
+
+		currentRow = 1;
+		currentCol = col % 16;
+
+		UpdateCharBuffer(3);
+		UpdateCharBuffer(4);
+		UpdateCharBuffer(4);
+		break;
+	case 3:
+		UpdateCharBuffer(6);
+		UpdateCharBuffer(6);
+		UpdateCharBuffer(2);
+
+		currentRow = 1;
+		currentCol = col % 16;
+
+		UpdateCharBuffer(4);
+		UpdateCharBuffer(4);
+		UpdateCharBuffer(5);
+		break;
+	case 4:
+		UpdateCharBuffer(3);
+		UpdateCharBuffer(4);
+		UpdateCharBuffer(2);
+
+		currentRow = 1;
+		currentCol = col % 16;
+
+		UpdateCharBuffer(' ');
+		UpdateCharBuffer(' ');
+		UpdateCharBuffer(0xFF);
+		break;
+	case 5:
+		UpdateCharBuffer(3);
+		UpdateCharBuffer(6);
+		UpdateCharBuffer(6);
+
+		currentRow = 1;
+		currentCol = col % 16;
+
+		UpdateCharBuffer(4);
+		UpdateCharBuffer(4);
+		UpdateCharBuffer(5);
+		break;
+	case 6:
+		UpdateCharBuffer(0);
+		UpdateCharBuffer(6);
+		UpdateCharBuffer(6);
+
+		currentRow = 1;
+		currentCol = col % 16;
+
+		UpdateCharBuffer(3);
+		UpdateCharBuffer(4);
+		UpdateCharBuffer(5);
+		break;
+	case 7:
+		UpdateCharBuffer(1);
+		UpdateCharBuffer(1);
+		UpdateCharBuffer(2);
+
+		currentRow = 1;
+		currentCol = col % 16;
+
+		UpdateCharBuffer(' ');
+		UpdateCharBuffer(' ');
+		UpdateCharBuffer(5);
+		break;
+	case 8:
+		UpdateCharBuffer(0);
+		UpdateCharBuffer(6);
+		UpdateCharBuffer(2);
+
+		currentRow = 1;
+		currentCol = col % 16;
+
+		UpdateCharBuffer(3);
+		UpdateCharBuffer(4);
+		UpdateCharBuffer(5);
+		break;
+	case 9:
+		UpdateCharBuffer(0);
+		UpdateCharBuffer(6);
+		UpdateCharBuffer(2);
+
+		currentRow = 1;
+		currentCol = col % 16;
+
+		UpdateCharBuffer(4);
+		UpdateCharBuffer(4);
+		UpdateCharBuffer(5);
+		break;
+	default:
+		UpdateCharBuffer(' ');
+		UpdateCharBuffer(' ');
+		UpdateCharBuffer(' ');
+
+		currentRow = 1;
+		currentCol = col % 16;
+
+		UpdateCharBuffer(' ');
+		UpdateCharBuffer(' ');
+		UpdateCharBuffer(' ');
+	}
+}
+
+void CLCD_PrintBigNumBuffer(uint8_t col, int8_t number){
+	if(number < 99) {
+		CLCD_PrintBigDigitBuffer(col, number / 10);
+		CLCD_PrintBigDigitBuffer(col + 3, number % 10);
+	}
+	else {
+		CLCD_PrintBigDigitBuffer(col, ' ');
+		CLCD_PrintBigDigitBuffer(col + 3, ' ');
+
+	}
+
+}
 
 
 
