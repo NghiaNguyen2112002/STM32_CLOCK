@@ -1,0 +1,2 @@
+../Core/Src/output.c:13:6:OUT_Init	16	static
+../Core/Src/output.c:20:6:OUT_SetBuzzer	16	static

@@ -28,6 +28,8 @@
 #include "input.h"
 #include "fsm.h"
 #include "global.h"
+#include "output.h"
+
 
 /* USER CODE END Includes */
 
@@ -102,7 +104,7 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start(&htim3);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 
@@ -113,11 +115,11 @@ int main(void)
   IN_Init();
   FSM_Init();
 
+  DHT_Init(DHT_GPIO_Port, DHT_Pin, &htim3);
+  OUT_Init(BUZZER_GPIO_Port, BUZZER_Pin);
   CLCD_Init(&hi2c1, 0x3F, 2, 16);
   CLCD_InitBigDigit();
   DS_Init(&hi2c1);
-
-  DHT_Init(DHT_GPIO_Port, DHT_Pin, &htim3);
 
   /* USER CODE END 2 */
 
@@ -137,6 +139,7 @@ int main(void)
 
 		  CLCD_DisplayScreen();
 //		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
 	  }
 
 
@@ -325,7 +328,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LED_Pin|BUZZER_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(DHT_GPIO_Port, DHT_Pin, GPIO_PIN_RESET);
@@ -336,12 +339,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LED_Pin */
-  GPIO_InitStruct.Pin = LED_Pin;
+  /*Configure GPIO pins : LED_Pin BUZZER_Pin */
+  GPIO_InitStruct.Pin = LED_Pin|BUZZER_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : DHT_Pin */
   GPIO_InitStruct.Pin = DHT_Pin;

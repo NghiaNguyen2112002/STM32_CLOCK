@@ -12,9 +12,9 @@ TIM_HandleTypeDef *stimer;
 
 static uint8_t	TIME_CYCLE 		= 50;
 
-static uint8_t MUL_timer		= 1;
+static uint16_t MUL_timer		= 1;
 static uint8_t flag_timer		= 0;
-static uint8_t counter_timer 	= 0;
+static uint16_t counter_timer 	= 0;
 
 void RunSoftwareTimer(void){
 	if(counter_timer > 0){

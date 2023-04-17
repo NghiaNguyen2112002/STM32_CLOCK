@@ -54,17 +54,19 @@ void DHT_Init(GPIO_TypeDef* DHT_port, uint16_t DHT_pin, TIM_HandleTypeDef* timer
 	dht11.humi = dht11.temp = 0;
 
 	SetPinOut();
-//	SetPinIn();
-	WritePin(0);
+	WritePin(1);
 }
 
 
 void DHT_Read(void){
-	return;
-	uint32_t time_out;
+
+
+	uint16_t time_out = 0;
 	uint8_t data[5] = {0, 0, 0, 0, 0};
 	uint8_t humi_integral, humi_decimal,
 			temp_integral, temp_decimal, check_sum;
+
+	uint16_t temp, humi;
 /*
 	data[0] integral Humi
 	data[1] decimal Humi
@@ -72,26 +74,29 @@ void DHT_Read(void){
 	data[3] decimal Temp
 	data[4] SUM
 */
+
 	SetPinOut();
 	WritePin(0);
-	HAL_Delay(18);
+	HAL_Delay(20);
 
 
 	SetPinIn();
+
 	Delay_us(40);
 
 	if(!ReadPin()){
 		Delay_us(80);
 	}
 
-	for(time_out = 0; (time_out < 1000) && ReadPin(); time_out++);
 
+
+	for(time_out = 0; (time_out < 100) && ReadPin(); time_out++);
 
 //	start DHT successful => read
 	for(uint8_t i = 0; i < 5; i++){
 		for(uint8_t j = 0; j < 8; j++){
 
-			for(time_out = 0; (time_out < 1000) && !ReadPin(); time_out++);
+			for(time_out = 0; (time_out < 100) && !ReadPin(); time_out++);
 
 			Delay_us(40);
 
@@ -99,32 +104,28 @@ void DHT_Read(void){
 			else data[i] |= (1 << (7-j));
 
 
-			for(time_out = 0; (time_out < 1000) && ReadPin(); time_out++);
+			for(time_out = 0; (time_out < 100) && ReadPin(); time_out++);
 		}
 	}
 
-	humi_integral = data[0];
-	humi_decimal = data[1];
-	temp_integral = data[2];
-	temp_decimal = data[3];
-	check_sum = data[4];
+	if(data[4] != (data[0] + data[1] + data[2] + data[3]))
+		return;
 
+	humi = (float)(data[0] * 1.0 + data[1] / 10.0);
+	temp = (float)(data[2] * 1.0 + data[3] / 10.0);
 
-//
-//	if(check_sum != (humi_integral + humi_decimal + temp_integral + temp_decimal))
-//		return 0;
+	dht11.humi = humi;
+	dht11.temp = temp;
 
-//	dht11.humi = (float)( ((humi_integral << 8)|humi_decimal) / 10.0);
-//	dht11.temp = (float)( ((temp_integral << 8)|temp_decimal) / 10.0);
+	SetPinOut();
+	WritePin(1);
 }
 
 float DHT_GetTemp(void){
-	return 30.3;
-//	return dht11.temp;
+	return dht11.temp;
 }
 
 float DHT_GetHumi(void){
-	return 50.5;
-//	return dht11.humi;
+	return dht11.humi;
 }
 

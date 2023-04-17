@@ -15,6 +15,7 @@
 #include "lcd_screen.h"
 #include "input.h"
 #include "global.h"
+#include "output.h"
 
 //==================MODE FSM SYSTEM CONTROL==================//
 #define INIT					0
@@ -43,7 +44,7 @@
 #define TIME_SCREEN_DATE		500				//5000ms
 #define TIME_READ_DHT			1000			//10 000ms
 #define TIME_OUT_FOR_SET		1000			//10 000ms
-#define TIME_FOR_ALARM_GO_OF	500				//5000ms
+#define TIME_FOR_ALARM_GO_OF	2000			//20 000ms
 
 
 void FSM_Init(void);

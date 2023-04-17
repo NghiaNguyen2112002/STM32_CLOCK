@@ -63,6 +63,8 @@ void Error_Handler(void);
 #define BT0_GPIO_Port GPIOA
 #define LED_Pin GPIO_PIN_5
 #define LED_GPIO_Port GPIOA
+#define BUZZER_Pin GPIO_PIN_6
+#define BUZZER_GPIO_Port GPIOA
 #define BT2_Pin GPIO_PIN_10
 #define BT2_GPIO_Port GPIOA
 #define DHT_Pin GPIO_PIN_5

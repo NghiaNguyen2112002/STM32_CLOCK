@@ -18,7 +18,7 @@ uint8_t currentCol, currentRow;
 static void Delay(uint16_t time){
 	HAL_Delay(time);
 }
-
+//===========CUSTOM FOR BIG DIGIT========//
 uint8_t LT[8] = {
 		0b00111,
 		0b01111,
@@ -94,6 +94,42 @@ uint8_t MB[8] = {
 		0b11111,
 		0b11111
 };
+
+
+//===========CUSTOM FOR ICON========//
+uint8_t alarm_icon[8] = {
+		0b00100,
+		0b01110,
+		0b01110,
+		0b01110,
+		0b11111,
+		0b00000,
+		0b00100,
+		0b00000
+};
+
+uint8_t temp_icon[8] = {
+		0b00000,
+		0b00000,
+		0b10101,
+		0b01110,
+		0b11011,
+		0b01110,
+		0b10101,
+		0b00000
+};
+
+uint8_t humi_icon[8] = {
+		0b00100,
+		0b00100,
+		0b01010,
+		0b01010,
+		0b10001,
+		0b10001,
+		0b10001,
+		0b01110
+};
+
 
 static void WriteI2C(uint8_t data, uint8_t mode){
 	uint8_t dataH, dataL;
@@ -212,7 +248,7 @@ void CLCD_PrintStringBuffer(uint8_t row, uint8_t col, char* str){
 	}
 }
 
-void CLCD_PrintNumBuffer(uint8_t row, uint8_t col, int16_t num){
+void CLCD_PrintNumBuffer(uint8_t row, uint8_t col, int32_t num){
     char flag_num = 0;
     unsigned char i;
     unsigned long power_of_10 = 1000000000;
@@ -254,17 +290,20 @@ void CLCD_PrintNumBuffer(uint8_t row, uint8_t col, int16_t num){
 
 void CLCD_PrintFloatBuffer(uint8_t row, uint8_t col, float f){
 	uint8_t integer_part, decimal_part;
-
-	if(f >= 100) return;
-
     currentRow = row % 2;
     currentCol = col % 16;
 
     integer_part = (uint8_t) f;
     decimal_part = (uint8_t) ((f - integer_part)*10);
 
-    UpdateCharBuffer(integer_part / 10 + '0');
-    UpdateCharBuffer(integer_part % 10 + '0');
+    if(integer_part > 99){
+    	UpdateCharBuffer(integer_part / 100 + '0');
+    }
+
+
+    UpdateCharBuffer((integer_part % 100) / 10 + '0');
+    UpdateCharBuffer((integer_part % 100) % 10 + '0');
+
     UpdateCharBuffer('.');
     UpdateCharBuffer(decimal_part % 10 + '0');
 }

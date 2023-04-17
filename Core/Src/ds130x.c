@@ -33,7 +33,7 @@ void DS_Init(I2C_HandleTypeDef* hi2c){
 
 
 void DS_Write(uint8_t address, uint8_t data){
-	uint8_t byte[2] = { address, data };
+	uint8_t byte[2] = { address, DEC2BCD(data) };
 	HAL_I2C_Master_Transmit(i2c_ds, ADDRESS_DS130X << 1, byte, 2, 1000);
 }
 

@@ -55,6 +55,7 @@ char* ConvertWeekdayToStr(uint8_t x){
 void FSM_Init(void){
 	mode_sys = INIT;
 	_time_screen = 50;
+	HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, SET);
 }
 
 void FSM_SystemControl(void){
@@ -67,11 +68,16 @@ void FSM_SystemControl(void){
 
 		if(_time_screen < 5){
 			_time_screen = TIME_SCREEN_TIME;
+			ReadTimeDs1307();
+
+			CLCD_CreateChar(7, alarm_icon);
+			CLCD_InitBigDigit();
 
 			CLCD_PrintStringBuffer(0, 0, SCREEN_TIME_0);
 			CLCD_PrintStringBuffer(1, 0, SCREEN_TIME_1);
 
-			ReadTimeDs1307();
+			if(_data_sys.alarm_flag) CLCD_PrintCharBuffer(0, INDEX_LCD_ICON_ALARM, 7);
+
 			mode_sys = DISPLAY_TIME;
 		}
 		break;
@@ -107,8 +113,9 @@ void FSM_SystemControl(void){
 			CLCD_PrintStringBuffer(1, 0, SCREEN_CONFIRM_SET_ALARM_1);
 			mode_sys = SET_ALARM;
 		}
-		else if(_data_sys.alarm_flag && (_data_sys.hour == _data_sys.alarm_hour) && (_data_sys.min == _data_sys.alarm_min)){
-			_timeout = TIME_FOR_ALARM_GO_OF;
+		else if(_data_sys.alarm_flag && (_data_sys.hour == _data_sys.alarm_hour)
+				&& (_data_sys.min == _data_sys.alarm_min) && (_data_sys.sec == 0)){
+			_time_out = TIME_FOR_ALARM_GO_OF;
 			CLCD_PrintStringBuffer(0, 0, SCREEN_ALARM_GO_OFF_0);
 			CLCD_PrintStringBuffer(1, 0, SCREEN_ALARM_GO_OFF_1);
 			mode_sys = ALARM_GO_OFF;
@@ -116,9 +123,14 @@ void FSM_SystemControl(void){
 		else if(_time_screen < 5 || IN_IsPressed(BT_MODE)){
 			_time_screen = TIME_SCREEN_DATE;
 
+			CLCD_CreateChar(0, temp_icon);
+			CLCD_CreateChar(1, humi_icon);
+
 			CLCD_PrintStringBuffer(0, 0, SCREEN_DATE_DHT_0);
 			CLCD_PrintStringBuffer(1, 0, SCREEN_DATE_DHT_1);
 			CLCD_PrintCharBuffer(1, INDEX_CEL_SYMBOL, 0xDF);
+			CLCD_PrintCharBuffer(1, INDEX_LCD_TEMP_SYMBOL, 0);
+			CLCD_PrintCharBuffer(1, INDEX_LCD_HUMI_SYMBOL, 1);
 			mode_sys = DISPLAY_DATE_DHT;
 		}
 		break;
@@ -150,17 +162,24 @@ void FSM_SystemControl(void){
 			CLCD_PrintStringBuffer(1, 0, SCREEN_CONFIRM_SET_ALARM_1);
 			mode_sys = SET_ALARM;
 		}
-		else if(_data_sys.alarm_flag && (_data_sys.hour == _data_sys.alarm_hour) && (_data_sys.min == _data_sys.alarm_min)){
-			_timeout = TIME_FOR_ALARM_GO_OF;
+		else if(_data_sys.alarm_flag && (_data_sys.hour == _data_sys.alarm_hour)
+				&& (_data_sys.min == _data_sys.alarm_min) && (_data_sys.sec == 0)){
+			_time_out = TIME_FOR_ALARM_GO_OF;
 			CLCD_PrintStringBuffer(0, 0, SCREEN_ALARM_GO_OFF_0);
 			CLCD_PrintStringBuffer(1, 0, SCREEN_ALARM_GO_OFF_1);
 			mode_sys = ALARM_GO_OFF;
 		}
 		else if(_time_screen < 5 || IN_IsPressed(BT_MODE)){
 			_time_screen = TIME_SCREEN_TIME;
+			ReadTimeDs1307();
+
+			CLCD_CreateChar(7, alarm_icon);
+			CLCD_InitBigDigit();
 
 			CLCD_PrintStringBuffer(0, 0, SCREEN_TIME_0);
 			CLCD_PrintStringBuffer(1, 0, SCREEN_TIME_1);
+
+			if(_data_sys.alarm_flag) CLCD_PrintCharBuffer(0, INDEX_LCD_ICON_ALARM, 7);
 
 			mode_sys = DISPLAY_TIME;
 		}
@@ -228,8 +247,14 @@ void FSM_SystemControl(void){
 			_time_screen = TIME_SCREEN_TIME;
 
 			DS_Write(ADDRESS_MINUTE, _data_sys.min);
+
+			CLCD_CreateChar(7, alarm_icon);
+			CLCD_InitBigDigit();
+
 			CLCD_PrintStringBuffer(0, 0, SCREEN_TIME_0);
 			CLCD_PrintStringBuffer(1, 0, SCREEN_TIME_1);
+
+			if(_data_sys.alarm_flag) CLCD_PrintCharBuffer(0, INDEX_LCD_ICON_ALARM, 7);
 
 			mode_sys = DISPLAY_TIME;
 		}
@@ -368,9 +393,15 @@ void FSM_SystemControl(void){
 		if(IN_IsPressed(BT_MODE) || (_time_out < 5)){
 			_time_screen = TIME_SCREEN_DATE;
 			DS_Write(ADDRESS_YEAR, _data_sys.year);
+
+			CLCD_CreateChar(0, temp_icon);
+			CLCD_CreateChar(1, humi_icon);
+
 			CLCD_PrintStringBuffer(0, 0, SCREEN_DATE_DHT_0);
 			CLCD_PrintStringBuffer(1, 0, SCREEN_DATE_DHT_1);
 			CLCD_PrintCharBuffer(1, INDEX_CEL_SYMBOL, 0xDF);
+			CLCD_PrintCharBuffer(1, INDEX_LCD_TEMP_SYMBOL, 0);
+			CLCD_PrintCharBuffer(1, INDEX_LCD_HUMI_SYMBOL, 1);
 			mode_sys = DISPLAY_DATE_DHT;
 		}
 		break;
@@ -426,7 +457,7 @@ void FSM_SystemControl(void){
 		}
 		else if(_time_out < 5){
 			_time_screen = 50;
-
+			DS_Write(ADDRESS_HOUR_ALARM, _data_sys.alarm_hour);
 			mode_sys = INIT;
 		}
 		break;
@@ -453,13 +484,13 @@ void FSM_SystemControl(void){
 
 		if(IN_IsPressed(BT_MODE)){
 			_time_screen = 50;
-			DS_Write(ADDRESS_MINUTE, _data_sys.alarm_min);
+			DS_Write(ADDRESS_MIN_ALARM, _data_sys.alarm_min);
 
 			mode_sys = INIT;
 		}
 		else if(_time_out < 5){
 			_time_screen = 50;
-
+			DS_Write(ADDRESS_MIN_ALARM, _data_sys.alarm_min);
 			mode_sys = INIT;
 		}
 		break;
@@ -473,8 +504,16 @@ void FSM_SystemControl(void){
 			CLCD_PrintStringBuffer(1, 0, SCREEN_BLANK);
 		}
 
+		if(_counter_time_elapsed % 20 < 10){
+			OUT_SetBuzzer(0);
+		}
+		else {
+			OUT_SetBuzzer(1);
+		}
+
 		if(_time_out < 5 || IN_IsPressed(BT_MODE) || IN_IsPressed(BT_DEC) || IN_IsPressed(BT_INC)){
-			mode = INIT;
+			_time_screen = 50;
+			mode_sys = INIT;
 		}
 		break;
 	}

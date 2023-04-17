@@ -84,7 +84,7 @@ void CLCD_Init(I2C_HandleTypeDef* I2C, uint8_t address, uint8_t row, uint8_t col
 
 void CLCD_PrintCharBuffer(uint8_t row, uint8_t col, char c);
 void CLCD_PrintStringBuffer(uint8_t row, uint8_t col, char* str);
-void CLCD_PrintNumBuffer(uint8_t row, uint8_t col, int16_t num);
+void CLCD_PrintNumBuffer(uint8_t row, uint8_t col, int32_t num);
 void CLCD_PrintFloatBuffer(uint8_t row, uint8_t col, float f);
 
 void CLCD_ClearBuffer(void);
@@ -95,5 +95,12 @@ void CLCD_InitBigDigit(void);
 void CLCD_CreateChar(uint8_t addr, uint8_t* custom_arr);
 void CLCD_PrintBigDigitBuffer(uint8_t col, int8_t digit);
 void CLCD_PrintBigNumBuffer(uint8_t col, int8_t number);
+
+//==========CUSTOM ICON ADDRESS========//
+extern uint8_t alarm_icon[];
+extern uint8_t temp_icon[];
+extern uint8_t humi_icon[];
+
+
 
 #endif /* INC_LCD_I2C_H_ */
