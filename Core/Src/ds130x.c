@@ -39,6 +39,9 @@ void DS_Write(uint8_t address, uint8_t data){
 
 uint8_t DS_Read(uint8_t address){
 	uint8_t value = 0;
+
+//	HAL_I2C_Mem_Read(i2c_ds, ADDRESS_DS130X << 1, address, 1, &value, 1, 1000);
+
 	HAL_I2C_Master_Transmit(i2c_ds, ADDRESS_DS130X << 1, &address, 1, 1000);
 	HAL_I2C_Master_Receive(i2c_ds, ADDRESS_DS130X << 1, &value, 1, 1000);
 

@@ -113,20 +113,32 @@ int main(void)
   TM_SetTime(50);
 
   IN_Init();
-  FSM_Init();
-
   DHT_Init(DHT_GPIO_Port, DHT_Pin, &htim3);
   OUT_Init(BUZZER_GPIO_Port, BUZZER_Pin);
-  CLCD_Init(&hi2c1, 0x3F, 2, 16);
-  CLCD_InitBigDigit();
   DS_Init(&hi2c1);
 
+
+  CLCD_Init(&hi2c1, 0x3F, 2, 16);
+  CLCD_InitBigDigit();
+
+  FSM_Init();
+
+//  uint8_t j = 0;
+//  for(uint8_t i = 1; i < 128; i++){
+//	  if(HAL_I2C_IsDeviceReady(&hi2c1, i<<1, 3, 5) == HAL_OK && i != 0x27){
+//		  CLCD_PrintNumBuffer(j++, 0, i);
+//		  if( j == 2) break;
+////		  break;
+//	  }
+//  }
+  //  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, SET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
 	  if(TM_IsFlag()){
 		  _counter_time_elapsed = (_counter_time_elapsed + 1) % 200;
 

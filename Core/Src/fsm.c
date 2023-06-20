@@ -55,7 +55,8 @@ char* ConvertWeekdayToStr(uint8_t x){
 void FSM_Init(void){
 	mode_sys = INIT;
 	_time_screen = 50;
-	HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, SET);
+	OUT_SetBuzzer(1);
+
 }
 
 void FSM_SystemControl(void){

@@ -20,8 +20,8 @@
 
 //==================INDEX BUTTON==================//
 #define BT_INC							0
-#define BT_MODE							1
-#define BT_DEC							2
+#define BT_MODE							2
+#define BT_DEC							1
 
 void IN_Init(void);
 void IN_ReadButton(void);

@@ -12,6 +12,7 @@
 #include "stm32f1xx_hal.h"
 #include "main.h"
 
+//#define ADDRESS_DS130X       	0xD0		//ds1307
 #define ADDRESS_DS130X       	0x68		//ds1307
 
 #define ADDRESS_SECOND          0x00
